@@ -14,6 +14,7 @@ use bevy_ecs::{
     world::World,
 };
 use bevy_input::{
+    ime::Ime,
     keyboard::KeyboardInput,
     mouse::{MouseButtonInput, MouseMotion, MouseScrollUnit, MouseWheel},
     touch::TouchInput,
@@ -34,6 +35,7 @@ use winit::{
     dpi::{LogicalPosition, LogicalSize, PhysicalPosition},
     event::{self, DeviceEvent, Event, StartCause, WindowEvent},
     event_loop::{ControlFlow, EventLoop, EventLoopWindowTarget},
+    window::CursorGrabMode,
 };
 
 #[derive(Default)]
@@ -140,7 +142,11 @@ fn change_window(
                 bevy_window::WindowCommand::SetCursorLockMode { locked } => {
                     let window = winit_windows.get_window(id).unwrap();
                     window
-                        .set_cursor_grab(locked)
+                        .set_cursor_grab(if locked {
+                            CursorGrabMode::Confined
+                        } else {
+                            CursorGrabMode::None
+                        })
                         .unwrap_or_else(|e| error!("Unable to un/grab cursor: {}", e));
                 }
                 bevy_window::WindowCommand::SetCursorVisibility { visible } => {
@@ -228,6 +234,10 @@ fn change_window(
                     if constraints.max_width.is_finite() && constraints.max_height.is_finite() {
                         window.set_max_inner_size(Some(max_inner_size));
                     }
+                }
+                bevy_window::WindowCommand::SetImeAllowed { allowed } => {
+                    let window = winit_windows.get_window(id).unwrap();
+                    window.set_ime_allowed(allowed)
                 }
                 bevy_window::WindowCommand::Close => {
                     // Since we have borrowed `windows` to iterate through them, we can't remove the window from it.
@@ -590,6 +600,10 @@ pub fn winit_runner_with(mut app: App) {
                             id: window_id,
                             position,
                         });
+                    }
+                    WindowEvent::Ime(event::Ime::Commit(committed)) => {
+                        let mut events = world.resource_mut::<Events<Ime>>();
+                        events.send(Ime { value: committed });
                     }
                     _ => {}
                 }

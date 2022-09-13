@@ -283,6 +283,9 @@ pub enum WindowCommand {
     SetResizeConstraints {
         resize_constraints: WindowResizeConstraints,
     },
+    SetImeAllowed {
+        allowed: bool,
+    },
     Close,
 }
 
@@ -741,6 +744,12 @@ impl Window {
     #[inline]
     pub fn fit_canvas_to_parent(&self) -> bool {
         self.fit_canvas_to_parent
+    }
+
+    #[inline]
+    pub fn set_ime_allowed(&mut self, allowed: bool) {
+        self.command_queue
+            .push(WindowCommand::SetImeAllowed { allowed })
     }
 }
 

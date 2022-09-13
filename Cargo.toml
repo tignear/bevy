@@ -1073,6 +1073,16 @@ description = "Prints out all touch inputs"
 category = "Input"
 wasm = false
 
+[[example]]
+name = "ime"
+path = "examples/input/ime.rs"
+
+[package.metadata.example.ime]
+name = "Ime"
+description = "Enable Ime"
+category = "Input"
+wasm = false
+
 # Reflection
 [[example]]
 name = "reflection"
